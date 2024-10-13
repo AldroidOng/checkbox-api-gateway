@@ -6,8 +6,12 @@ import {
   CreateTaskResp,
   CreateTaskRespSuccess,
   ErrorResponse,
+  UpdateTaskPayload,
+  UpdateTaskResp,
+  UpdateTaskRespSuccess,
 } from 'src/shared/types/task-service.dto';
 import { CreateTaskReqDto } from './dtos/create-task.dto';
+import { UpdateTaskReqDto } from './dtos/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -19,7 +23,6 @@ export class TaskService {
         this.taskClient.send({ cmd: 'get_task' }, getTaskReq),
       );
 
-      // Check if the result is an error response
       if ((result as ErrorResponse).statusCode) {
         throw new BadRequestException((result as ErrorResponse).message);
       }
@@ -37,12 +40,30 @@ export class TaskService {
         this.taskClient.send({ cmd: 'create_task' }, createTaskReq),
       );
 
-      // Check if the result is an error response
       if ((result as ErrorResponse).statusCode) {
         throw new BadRequestException((result as ErrorResponse).message);
       }
 
       return result as CreateTaskRespSuccess;
+    } catch (error) {
+      console.error('Error:', error);
+      throw new BadRequestException('Error creating task: ' + error.message);
+    }
+  }
+
+  async updateTask(updateTaskReq: UpdateTaskReqDto): Promise<UpdateTaskResp> {
+    try {
+      const payload: UpdateTaskPayload = updateTaskReq;
+
+      const result: UpdateTaskResp | ErrorResponse = await firstValueFrom(
+        this.taskClient.send({ cmd: 'update_task' }, payload),
+      );
+
+      if ((result as ErrorResponse).statusCode) {
+        throw new BadRequestException((result as ErrorResponse).message);
+      }
+
+      return result as UpdateTaskRespSuccess;
     } catch (error) {
       console.error('Error:', error);
       throw new BadRequestException('Error creating task: ' + error.message);

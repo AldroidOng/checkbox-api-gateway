@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Query,
   UsePipes,
@@ -12,9 +13,10 @@ import { TaskService } from './task.service';
 import { GetTaskReqDto, GetTaskRespDto } from './dtos/get-task.dto';
 import {
   CreateTaskRespSuccess,
-  ErrorResponse,
+  UpdateTaskRespSuccess,
 } from 'src/shared/types/task-service.dto';
 import { CreateTaskReqDto, CreateTaskRespDto } from './dtos/create-task.dto';
+import { UpdateTaskReqDto, UpdateTaskRespDto } from './dtos/update-task.dto';
 
 @Controller('task')
 export class TaskController {
@@ -33,9 +35,22 @@ export class TaskController {
   ): Promise<CreateTaskRespDto> {
     try {
       const result = await this.taskService.createTask(createTaskReq);
-      return `Task Created under task ID: ${(result as CreateTaskRespSuccess).taskId}`;
+      return (result as CreateTaskRespSuccess).taskId;
     } catch (error) {
-      throw new BadRequestException(error.message); // This will automatically return an ErrorResponse
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Patch()
+  @UsePipes(new ValidationPipe())
+  async updateTask(
+    @Body() updateTaskReq: UpdateTaskReqDto,
+  ): Promise<UpdateTaskRespDto> {
+    try {
+      const result = await this.taskService.updateTask(updateTaskReq);
+      return (result as UpdateTaskRespSuccess).taskId;
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 }
